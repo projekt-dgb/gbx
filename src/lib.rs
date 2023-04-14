@@ -339,6 +339,53 @@ impl FlurstueckGroesse {
             FlurstueckGroesse::Hektar { ha, a, m2 } => m2.is_none() && ha.is_none() && a.is_none(),
         }
     }
+    pub fn get_m2(&self) -> u64 {
+        match self {
+            FlurstueckGroesse::Metrisch { m2 } => m2.unwrap_or(0),
+            FlurstueckGroesse::Hektar { ha, a, m2 } => {
+                ha.unwrap_or(0) * 100_000 + a.unwrap_or(0) * 100 + m2.unwrap_or(0)
+            }
+        }
+    }
+
+    pub fn get_ha_string(&self) -> String {
+        let m2_string = format!("{}", self.get_m2());
+        let mut m2_string_chars: Vec<char> = m2_string.chars().collect();
+        for _ in 0..4 {
+            m2_string_chars.pop();
+        }
+        m2_string_chars.iter().collect()
+    }
+
+    pub fn get_a_string(&self) -> String {
+        let m2_string = format!("{}", self.get_m2());
+        let mut m2_string_chars: Vec<char> = m2_string.chars().collect();
+        m2_string_chars.reverse();
+        for _ in 0..(m2_string_chars.len().saturating_sub(4)) {
+            m2_string_chars.pop();
+        }
+        m2_string_chars.reverse();
+        for _ in 0..2 {
+            m2_string_chars.pop();
+        }
+        m2_string_chars.iter().collect()
+    }
+
+    pub fn get_m2_string(&self) -> String {
+        let m2_string = format!("{}", self.get_m2());
+        let mut m2_string_chars: Vec<char> = m2_string.chars().collect();
+        m2_string_chars.reverse();
+        for _ in 0..(m2_string_chars.len().saturating_sub(2)) {
+            m2_string_chars.pop();
+        }
+        m2_string_chars.reverse();
+        let fi: String = m2_string_chars.iter().collect();
+        if fi.is_empty() {
+            format!("0")
+        } else {
+            fi
+        }
+    }
 }
 
 /// Position eines Textblocks im PDF
@@ -518,6 +565,54 @@ impl StringOrLines {
             StringOrLines::MultiLine(ml) => ml.is_empty(),
         }
     }
+
+    pub fn text(&self) -> String {
+        self.lines().join("\r\n")
+    }
+
+    pub fn text_clean(&self) -> String {
+        unhyphenate(&self.lines().join("\r\n"))
+    }
+
+    pub fn lines(&self) -> Vec<String> {
+        match self {
+            StringOrLines::SingleLine(s) => s.lines().map(|s| s.to_string()).collect(),
+            StringOrLines::MultiLine(ml) => ml.clone(),
+        }
+    }
+}
+
+lazy_static::lazy_static! {
+    static ref REGEX_UNHYPHENATE: regex::Regex = {
+        regex::RegexBuilder::new("(.*)-\\s([a-züäö])(.*)")
+                .multi_line(true)
+                .case_insensitive(false)
+                .build().unwrap()
+    };
+}
+
+fn unhyphenate(text: &str) -> String {
+    let und_saetze = text
+        .lines()
+        .map(|s| s.split("- und ").map(|s| s.to_string()).collect::<Vec<_>>())
+        .collect::<Vec<_>>();
+
+    let mut text_sauber = String::new();
+
+    for l in und_saetze.into_iter() {
+        let und_len = l.len();
+        for (index, mut s) in l.into_iter().enumerate() {
+            while REGEX_UNHYPHENATE.is_match(&s) {
+                s = REGEX_UNHYPHENATE.replace_all(&s, "$1$2$3").to_string();
+            }
+            text_sauber.push_str(&s);
+            if index + 1 != und_len {
+                text_sauber.push_str("- und ");
+            }
+        }
+    }
+
+    text_sauber
 }
 
 impl Default for StringOrLines {
