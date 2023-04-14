@@ -591,6 +591,105 @@ lazy_static::lazy_static! {
     };
 }
 
+impl Abt1EintragV1 {
+    pub fn ist_geroetet(&self) -> bool {
+        self.manuell_geroetet
+            .or(self.automatisch_geroetet.clone())
+            .unwrap_or(false)
+    }
+}
+
+impl BvEintrag {
+    pub fn ist_geroetet(&self) -> bool {
+        match self {
+            BvEintrag::Flurstueck(flst) => flst
+                .manuell_geroetet
+                .unwrap_or(flst.automatisch_geroetet.unwrap_or(false)),
+            BvEintrag::Recht(recht) => recht
+                .manuell_geroetet
+                .unwrap_or(recht.automatisch_geroetet.unwrap_or(false)),
+        }
+    }
+}
+
+impl Abt1GrundEintragung {
+    pub fn ist_geroetet(&self) -> bool {
+        self.manuell_geroetet
+            .or(self.automatisch_geroetet.clone())
+            .unwrap_or(false)
+    }
+}
+
+impl BvZuschreibung {
+    pub fn ist_geroetet(&self) -> bool {
+        self.manuell_geroetet
+            .or(self.automatisch_geroetet.clone())
+            .unwrap_or(false)
+    }
+    pub fn ist_leer(&self) -> bool {
+        self.bv_nr.is_empty() && self.text.is_empty()
+    }
+}
+
+impl BvAbschreibung {
+    pub fn ist_geroetet(&self) -> bool {
+        self.manuell_geroetet
+            .or(self.automatisch_geroetet.clone())
+            .unwrap_or(false)
+    }
+
+    pub fn ist_leer(&self) -> bool {
+        self.bv_nr.is_empty() && self.text.is_empty()
+    }
+}
+
+impl Abt1EintragV2 {
+    pub fn ist_geroetet(&self) -> bool {
+        self.manuell_geroetet
+            .or(self.automatisch_geroetet.clone())
+            .unwrap_or(false)
+    }
+}
+
+impl Abt1Eintrag {
+    pub fn get_lfd_nr(&self) -> usize {
+        match self {
+            Abt1Eintrag::V1(v1) => v1.lfd_nr,
+            Abt1Eintrag::V2(v2) => v2.lfd_nr,
+        }
+    }
+
+    pub fn get_eigentuemer(&self) -> String {
+        match self {
+            Abt1Eintrag::V1(v1) => v1.eigentuemer.text(),
+            Abt1Eintrag::V2(v2) => v2.eigentuemer.text(),
+        }
+    }
+
+    pub fn ist_geroetet(&self) -> bool {
+        match self {
+            Abt1Eintrag::V1(v1) => v1.ist_geroetet(),
+            Abt1Eintrag::V2(v2) => v2.ist_geroetet(),
+        }
+    }
+}
+
+impl Abt2Eintrag {
+    pub fn ist_geroetet(&self) -> bool {
+        self.manuell_geroetet
+            .or(self.automatisch_geroetet.clone())
+            .unwrap_or(false)
+    }
+}
+
+impl Abt3Eintrag {
+    pub fn ist_geroetet(&self) -> bool {
+        self.manuell_geroetet
+            .or(self.automatisch_geroetet.clone())
+            .unwrap_or(false)
+    }
+}
+
 fn unhyphenate(text: &str) -> String {
     let und_saetze = text
         .lines()
