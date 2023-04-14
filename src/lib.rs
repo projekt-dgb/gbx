@@ -416,17 +416,6 @@ pub struct BvZuschreibung {
     pub position_in_pdf: Option<PositionInPdf>,
 }
 
-impl BvZuschreibung {
-    pub fn ist_geroetet(&self) -> bool {
-        self.manuell_geroetet
-            .or(self.automatisch_geroetet.clone())
-            .unwrap_or(false)
-    }
-    pub fn ist_leer(&self) -> bool {
-        self.bv_nr.is_empty() && self.text.is_empty()
-    }
-}
-
 #[derive(Debug, Default, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BvAbschreibung {
     #[serde(default)]
@@ -444,18 +433,6 @@ pub struct BvAbschreibung {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub position_in_pdf: Option<PositionInPdf>,
-}
-
-impl BvAbschreibung {
-    pub fn ist_geroetet(&self) -> bool {
-        self.manuell_geroetet
-            .or(self.automatisch_geroetet.clone())
-            .unwrap_or(false)
-    }
-
-    pub fn ist_leer(&self) -> bool {
-        self.bv_nr.is_empty() && self.text.is_empty()
-    }
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
