@@ -636,10 +636,10 @@ impl Abt1Eintrag {
         }
     }
 
-    pub fn get_eigentuemer(&self) -> String {
+    pub fn get_eigentuemer(&self) -> StringOrLines {
         match self {
-            Abt1Eintrag::V1(v1) => v1.eigentuemer.text(),
-            Abt1Eintrag::V2(v2) => v2.eigentuemer.text(),
+            Abt1Eintrag::V1(v1) => v1.eigentuemer.clone(),
+            Abt1Eintrag::V2(v2) => v2.eigentuemer.clone(),
         }
     }
 
